@@ -164,25 +164,25 @@ public class JoustSceneManager : MonoBehaviour
 
     public void Left() { // When the player finishes the run right, it hits a trigger which calls this function to switch the player to the left side
 
-        resetLeftPosition();
-        playerControllerLeftAdjustments();
-        oppositionControllerLeftAdjustments();
         leftPlayerAnimations();
         leftEnemyAnimations();
-        resetVelocity();
+        playerControllerLeftAdjustments();
         healthResets();
+        oppositionControllerLeftAdjustments();
+        resetLeftPosition();
+        resetVelocity();
 
     }
 
     public void Right() { // When the player finishes the run left, it hits a trigger which calls this function to switch the player to the right side
 
-        resetRightPosition();
-        playerControllerRightAdjustments(); 
-        oppositionControllerRightAdjustments();
         rightPlayerAnimations();
         rightEnemyAnimations();
-        resetVelocity();
+        playerControllerRightAdjustments(); 
         healthResets();
+        oppositionControllerRightAdjustments();
+        resetRightPosition();
+        resetVelocity();
 
     }
 
@@ -205,12 +205,12 @@ public class JoustSceneManager : MonoBehaviour
         playerCharacter.GetComponent<PlayerRightController>().powerMoment = 0;
     }
     public void oppositionControllerRightAdjustments() {
-        oppositionCharacter.GetComponent<OpponentRightControls>().enabled = true;
+        oppositionCharacter.GetComponent<OpponentRightControls>().enabled = false;
         oppositionCharacter.GetComponent<OpponentLeftControls>().enabled = false;
     }
     public void oppositionControllerLeftAdjustments() {
         oppositionCharacter.GetComponent<OpponentRightControls>().enabled = false;
-        oppositionCharacter.GetComponent<OpponentLeftControls>().enabled = true;
+        oppositionCharacter.GetComponent<OpponentLeftControls>().enabled = false;
     }
 
     public void rightPlayerAnimations() {
