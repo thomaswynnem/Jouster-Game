@@ -87,54 +87,17 @@ public class JoustSceneManager : MonoBehaviour
 
         float playerYcomp;
         float playerXcomp;
-        if (selectedCharacterIndex==0) { // Specifications for exact coords
-
-            playerYcomp = 3.53f;
-            playerXcomp = -6.18f;
-
-        } else if (selectedCharacterIndex==1){
-
-            playerYcomp = 3.73f;
-            playerXcomp = -5.95f;
-
-        } else {
-
-            playerYcomp = 4.1f;
-            playerXcomp = -6f;
-
-        }
+        playerXcomp = findPlayerX(selectedCharacterIndex);
+        playerYcomp = findPlayerY(selectedCharacterIndex);
 
         float oppositionYcomp;
         float oppositionXcomp;
-        if (oppositionIndex==0) {
+        oppositionXcomp = findOppositionX(oppositionIndex);
+        oppositionYcomp = findOppositionY(oppositionIndex);
 
-            oppositionYcomp = 3.53f;
-            oppositionXcomp = 1.85f;
-
-        } else if (oppositionIndex==1) {
-
-            oppositionYcomp = 3.69f;
-            oppositionXcomp = 2.13f;
-
-        }else {
-
-            oppositionYcomp = 4.14f;
-            oppositionXcomp = 2.07f;
-
-        }
-        playerFace = new GameObject("PlayerFace");
-        SpriteRenderer playerFaceSpriteRenderer = playerFace.AddComponent<SpriteRenderer>();
-        playerFaceSpriteRenderer.sprite = faces[selectedCharacterIndex];
-        playerFaceSpriteRenderer.sortingOrder = 13;
-        playerFace.transform.position = new Vector3(playerXcomp, playerYcomp, 0);
-        playerFace.transform.localScale = new Vector3(2.3f, 2.3f, 0);
-        oppositionFace = new GameObject("OppositionFace");
-        SpriteRenderer oppositionFace1SpriteRenderer = oppositionFace.AddComponent<SpriteRenderer>();
-        oppositionFace1SpriteRenderer.sprite = faces[oppositionIndex];
-        oppositionFace1SpriteRenderer.sortingOrder = 13;
-        oppositionFace.transform.position = new Vector3(oppositionXcomp, oppositionYcomp, 0);
-        oppositionFace.transform.localScale = new Vector3(2.3f, 2.3f, 0);
-
+        renderGoodFace(playerXcomp, playerYcomp);
+        renderBadFace(oppositionXcomp, oppositionYcomp);
+        
     }
 
     private void InitializePlayer() { // The player game object is manually created and adjusted through this function
@@ -201,61 +164,56 @@ public class JoustSceneManager : MonoBehaviour
 
     public void Left() { // When the player finishes the run right, it hits a trigger which calls this function to switch the player to the left side
 
-        playerCharacter.transform.position = new Vector3(6, -3, 0);
-        oppositionCharacter.transform.position = new Vector3(-6, -3, 0);
-        playerCharacter.GetComponent<PlayerRightController>().enabled = false;
-        playerCharacter.GetComponent<PlayerLeftController>().enabled = true;
-        playerCharacter.GetComponent<PlayerLeftController>().held = 0f;
-        playerCharacter.GetComponent<Rigidbody2D>().velocity = new Vector2(0, 0);
-        playerCharacter.GetComponent<PlayerLeftController>().opened = false;
-        oppositionCharacter.GetComponent<OpponentRightControls>().enabled = false;
-        oppositionCharacter.GetComponent<OpponentLeftControls>().enabled = false;
-        oppositionCharacter.GetComponent<Rigidbody2D>().velocity = new Vector2(0, 0);
-        Anim anim = playerCharacter.GetComponent<Anim>();
-        anim.anime[0] = enemies[selectedCharacterIndex];
-        playerCharacter.GetComponent<SpriteRenderer>().sprite = enemies[selectedCharacterIndex];
-        anim.anime[1] = moveEnemies[selectedCharacterIndex];
-        anim.anime[2] = thrustBack[selectedCharacterIndex];
-        anim.anime[3] = dodgeBack[selectedCharacterIndex];
-        if (selectedCharacterIndex == 1) {
-
-            anim.anime[4] = player1powerBack[0];
-            anim.anime[5] = player1powerBack[1];
-            anim.anime[6] = player1powerBack[2];
-
-        } else if (selectedCharacterIndex == 2) {
-
-            anim.anime[4] = player2powerBack[0];
-            anim.anime[5] = player2powerBack[1];
-            anim.anime[6] = player2powerBack[2];
-
-        }
-        playerCharacter.GetComponent<PlayerLeftController>().times = 0;
-        playerCharacter.GetComponent<PlayerLeftController>().powerMoment = 0;
-        playerCharacter.GetComponent<PlayerRightController>().powerMoment = 0;
-        Anim enemy1Anim = oppositionCharacter.GetComponent<Anim>();
-        enemy1Anim.anime[0] = characters[oppositionIndex];
-        enemy1Anim.GetComponent<SpriteRenderer>().sprite = characters[oppositionIndex];
-        enemy1Anim.anime[1] = moveCharacters[oppositionIndex];
-        enemy1Anim.anime[2] = thrustFor[oppositionIndex];
-        enemy1Anim.anime[3] = dodgeFor[oppositionIndex];
-        healthManager.GetComponent<healthManager>().generatedJoust = 0;
-        healthManager.GetComponent<healthManager>().contact = 0;
+        resetLeftPosition();
+        playerControllerLeftAdjustments();
+        oppositionControllerLeftAdjustments();
+        leftPlayerAnimations();
+        leftEnemyAnimations();
+        resetVelocity();
+        healthResets();
 
     }
 
     public void Right() { // When the player finishes the run left, it hits a trigger which calls this function to switch the player to the right side
 
-        playerCharacter.transform.position = new Vector3(-6, -3, 0);
-        oppositionCharacter.transform.position = new Vector3(6, -3, 0);
+        resetRightPosition();
+        playerControllerRightAdjustments(); 
+        oppositionControllerRightAdjustments();
+        rightPlayerAnimations();
+        rightEnemyAnimations();
+        resetVelocity();
+        healthResets();
+
+    }
+
+    public void playerControllerRightAdjustments() {
         playerCharacter.GetComponent<PlayerRightController>().enabled = true;
         playerCharacter.GetComponent<PlayerRightController>().held = 0f;
         playerCharacter.GetComponent<PlayerRightController>().opened = false;
         playerCharacter.GetComponent<PlayerLeftController>().enabled = false;
-        playerCharacter.GetComponent<Rigidbody2D>().velocity = new Vector2(0, 0);
-        oppositionCharacter.GetComponent<OpponentRightControls>().enabled = false;
+        playerCharacter.GetComponent<PlayerRightController>().times = 0;
+        playerCharacter.GetComponent<PlayerLeftController>().powerMoment = 0;
+        playerCharacter.GetComponent<PlayerRightController>().powerMoment = 0;
+    }
+    public void playerControllerLeftAdjustments() {
+        playerCharacter.GetComponent<PlayerRightController>().enabled = false;
+        playerCharacter.GetComponent<PlayerLeftController>().enabled = true;
+        playerCharacter.GetComponent<PlayerLeftController>().held = 0f;
+        playerCharacter.GetComponent<PlayerLeftController>().opened = false;
+        playerCharacter.GetComponent<PlayerLeftController>().times = 0;
+        playerCharacter.GetComponent<PlayerLeftController>().powerMoment = 0;
+        playerCharacter.GetComponent<PlayerRightController>().powerMoment = 0;
+    }
+    public void oppositionControllerRightAdjustments() {
+        oppositionCharacter.GetComponent<OpponentRightControls>().enabled = true;
         oppositionCharacter.GetComponent<OpponentLeftControls>().enabled = false;
-        oppositionCharacter.GetComponent<Rigidbody2D>().velocity = new Vector2(0, 0);
+    }
+    public void oppositionControllerLeftAdjustments() {
+        oppositionCharacter.GetComponent<OpponentRightControls>().enabled = false;
+        oppositionCharacter.GetComponent<OpponentLeftControls>().enabled = true;
+    }
+
+    public void rightPlayerAnimations() {
         Anim anim = playerCharacter.GetComponent<Anim>();
         anim.anime[0] = characters[selectedCharacterIndex];
         playerCharacter.GetComponent<SpriteRenderer>().sprite = characters[selectedCharacterIndex];
@@ -275,18 +233,130 @@ public class JoustSceneManager : MonoBehaviour
             anim.anime[6] = player2powerFor[2];
 
         }
-        playerCharacter.GetComponent<PlayerRightController>().times = 0;
-        playerCharacter.GetComponent<PlayerLeftController>().powerMoment = 0;
-        playerCharacter.GetComponent<PlayerRightController>().powerMoment = 0;
+    }
+    public void leftPlayerAnimations() {
+        Anim anim = playerCharacter.GetComponent<Anim>();
+        anim.anime[0] = enemies[selectedCharacterIndex];
+        playerCharacter.GetComponent<SpriteRenderer>().sprite = enemies[selectedCharacterIndex];
+        anim.anime[1] = moveEnemies[selectedCharacterIndex];
+        anim.anime[2] = thrustBack[selectedCharacterIndex];
+        anim.anime[3] = dodgeBack[selectedCharacterIndex];
+        if (selectedCharacterIndex == 1) {
+
+            anim.anime[4] = player1powerBack[0];
+            anim.anime[5] = player1powerBack[1];
+            anim.anime[6] = player1powerBack[2];
+
+        } else if (selectedCharacterIndex == 2) {
+
+            anim.anime[4] = player2powerBack[0];
+            anim.anime[5] = player2powerBack[1];
+            anim.anime[6] = player2powerBack[2];
+
+        }
+    }
+    public void rightEnemyAnimations() {
         Anim enemy1Anim = oppositionCharacter.GetComponent<Anim>();
         enemy1Anim.anime[0] = enemies[oppositionIndex];
         enemy1Anim.GetComponent<SpriteRenderer>().sprite = enemies[oppositionIndex];
         enemy1Anim.anime[1] = moveEnemies[oppositionIndex];
         enemy1Anim.anime[2] = thrustBack[oppositionIndex];
         enemy1Anim.anime[3] = dodgeBack[oppositionIndex];
-        healthManager.GetComponent<healthManager>().generatedJoust = 0;
-        healthManager.GetComponent<healthManager>().contact = 0;
+    }
+
+    public void leftEnemyAnimations() {
+        Anim enemy1Anim = oppositionCharacter.GetComponent<Anim>();
+        enemy1Anim.anime[0] = characters[oppositionIndex];
+        enemy1Anim.GetComponent<SpriteRenderer>().sprite = characters[oppositionIndex];
+        enemy1Anim.anime[1] = moveCharacters[oppositionIndex];
+        enemy1Anim.anime[2] = thrustFor[oppositionIndex];
+        enemy1Anim.anime[3] = dodgeFor[oppositionIndex];
+    }
+
+    public void resetVelocity() {
+        playerCharacter.GetComponent<Rigidbody2D>().velocity = new Vector2(0, 0);
+        oppositionCharacter.GetComponent<Rigidbody2D>().velocity = new Vector2(0, 0);
 
     }
+    public void resetRightPosition() {
+        playerCharacter.transform.position = new Vector3(-6, -3, 0);
+        oppositionCharacter.transform.position = new Vector3(6, -3, 0);
+    }
+    public void resetLeftPosition() {
+        playerCharacter.transform.position = new Vector3(6, -3, 0);
+        oppositionCharacter.transform.position = new Vector3(-6, -3, 0);
+    }
+
+    public void healthResets() {
+        healthManager.GetComponent<healthManager>().generatedJoust = 0;
+        healthManager.GetComponent<healthManager>().contact = 0;
+    }
+
+    public float findPlayerX(int selectedCharacterIndex) {
+        
+        if (selectedCharacterIndex==0) { // Specifications for exact coords
+            return -6.18f;
+        } else if (selectedCharacterIndex==1){
+            return -5.95f;
+        } else {
+            return -6f;
+        }
+
+    }
+
+    public float findPlayerY(int selectedCharacterIndex) {
+
+        if (selectedCharacterIndex==0) { // Specifications for exact coords
+            return 3.53f;
+        } else if (selectedCharacterIndex==1){
+            return 3.73f;
+        } else {
+            return 4.1f;
+        }
+
+    }
+
+    public float findOppositionX(int oppositionIndex) {
+
+        if (oppositionIndex==0) { // Specifications for exact coords
+            return 1.85f;
+        } else if (oppositionIndex==1){
+            return 2.13f;
+        } else {
+            return 2.07f;
+        }
+
+    }
+
+    public float findOppositionY(int oppositionIndex) {
+
+        if (oppositionIndex==0) { // Specifications for exact coords
+            return 3.53f;
+        } else if (oppositionIndex==1){
+            return 3.69f;
+        } else {
+            return 4.14f;
+        }
+
+    }
+
+    private void renderGoodFace(float playerXcomp, float playerYcomp) {
+        playerFace = new GameObject("PlayerFace");
+        SpriteRenderer playerFaceSpriteRenderer = playerFace.AddComponent<SpriteRenderer>();
+        playerFaceSpriteRenderer.sprite = faces[selectedCharacterIndex];
+        playerFaceSpriteRenderer.sortingOrder = 13;
+        playerFace.transform.position = new Vector3(playerXcomp, playerYcomp, 0);
+        playerFace.transform.localScale = new Vector3(2.3f, 2.3f, 0);
+    }
+
+    private void renderBadFace(float oppositionXcomp, float oppositionYcomp) {
+        oppositionFace = new GameObject("OppositionFace");
+        SpriteRenderer oppositionFace1SpriteRenderer = oppositionFace.AddComponent<SpriteRenderer>();
+        oppositionFace1SpriteRenderer.sprite = faces[oppositionIndex];
+        oppositionFace1SpriteRenderer.sortingOrder = 13;
+        oppositionFace.transform.position = new Vector3(oppositionXcomp, oppositionYcomp, 0);
+        oppositionFace.transform.localScale = new Vector3(2.3f, 2.3f, 0);
+    }
+
 
 }

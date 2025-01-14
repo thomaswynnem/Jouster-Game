@@ -98,7 +98,7 @@ public class healthManager : MonoBehaviour
 
    private int Attack(float distance) {
 
-    if (distance <= .6f || (Jouster.GetComponent<PlayerRightController>().power == 3 && Jouster.GetComponent<PlayerRightController>().powerMoment == 1 && distance <= 1)) {
+    if (distance <= .55f || (Jouster.GetComponent<PlayerRightController>().power == 3 && Jouster.GetComponent<PlayerRightController>().powerMoment == 1 && distance <= 1)) {
 
             int evilHealth = PlayerPrefs.GetInt("oppositionHealth");
             float perc = random.Next(1,5) * (1f/4f);
